@@ -75,7 +75,8 @@ $(document).ready(function() {
 	            		}
 	            		var id = 't' + localNode + 'c0' + 'r' + row;
 	            		//console.log(id);
-	            		tablehtml += '<td id="' + id + '" class="nodeNum">' + tabledata[localNode].remote_nodes[row].node + '</td>';
+	            		//tablehtml += '<td id="' + id + '" class="nodeNum">' + tabledata[localNode].remote_nodes[row].node + '</td>';
+	            		tablehtml += '<td id="' + id + '">' + tabledata[localNode].remote_nodes[row].node + '</td>';
             		
 	            		// Show info or IP if no info
 	            		if (tabledata[localNode].remote_nodes[row].info != "") {
@@ -84,10 +85,10 @@ $(document).ready(function() {
 		            		tablehtml += '<td>' + tabledata[localNode].remote_nodes[row].ip + '</td>';
 	            		}
             		
-	            		tablehtml += '<td id="lkey' + row + '">' + tabledata[localNode].remote_nodes[row].last_keyed + '</td>';
+	            		tablehtml += '<td><span id="lkey' + row + '">' + tabledata[localNode].remote_nodes[row].last_keyed + '</span></td>';
 	            		tablehtml += '<td>' + tabledata[localNode].remote_nodes[row].link + '</td>';
 	            		tablehtml += '<td>' + tabledata[localNode].remote_nodes[row].direction + '</td>';
-	            		tablehtml += '<td id="elap' + row +'">' + tabledata[localNode].remote_nodes[row].elapsed + '</td>';
+	            		tablehtml += '<td><span id="elap' + row +'">' + tabledata[localNode].remote_nodes[row].elapsed + '</span></td>';
             		
 	            		// Show mode in plain english
 	            		if (tabledata[localNode].remote_nodes[row].mode == 'R') {
@@ -99,7 +100,12 @@ $(document).ready(function() {
 	            		} else {
 		            		tablehtml += '<td>' + tabledata[localNode].remote_nodes[row].mode + '</td>';
 	            		}
-	            		tablehtml += '</tr>';
+                  
+                  tablehtml += '<td>';
+                  // Disconnect button
+                  tablehtml += '<button type="button" class="disconnect-button btn btn-danger btn-sm" id="disconnect-button_' + localNode + '_' + tabledata[localNode].remote_nodes[row].node + '">Disconnect</button>';
+	            		
+                  tablehtml += '</td></tr>';
 	        		}
         		
 					//console.log('tablehtml: ' + tablehtml);
@@ -147,7 +153,7 @@ $(document).ready(function() {
 <br/>
 <!-- Connect form -->
 <div id="connect_form">
-<?php 
+<?php /*
 if (count($nodes) > 0) {
     if (count($nodes) > 1) {
         print "<select id=\"localnode\">";
@@ -161,8 +167,9 @@ if (count($nodes) > 0) {
         print "</select>\n";
     } else {
         print "<input type=\"hidden\" id=\"localnode\" value=\"{$nodes[0]}\">\n";
-    }
+    } */
 ?>
+<!--
 <input type="text" id="node">
 Permanent <input type="checkbox"><br/>
 <input type="button" value="Connect" id="connect">
@@ -170,8 +177,9 @@ Permanent <input type="checkbox"><br/>
 <input type="button" value="Monitor" id="monitor">
 <input type="button" value="Local Monitor" id="localmonitor">
 <input type="button" value="Control Panel" id="controlpanel">
+-->
 <?php
-} #endif (count($nodes) > 0)
+//} #endif (count($nodes) > 0)
 ?>
 </div>
 
@@ -191,28 +199,53 @@ foreach($nodes as $node) {
     } else {
         $nodeURL = "http://stats.allstarlink.org/nodeinfo.cgi?node=$node";
         $bubbleChart = "http://stats.allstarlink.org/getstatus.cgi?$node";
-    	$title = "Node <a href=\"$nodeURL\" target=\"_blank\">$node</a> - $info ";
-    	$title .= "<a href=\"$bubbleChart\" target=\"_blank\" id=\"bubblechart\">Bubble Chart</a>";
+    	$title = "Node <a href=\"$nodeURL\" class=\"link-light\" target=\"_blank\">$node</a> - $info ";
+    	$title .= "<a href=\"$bubbleChart\" class=\"link-light\" target=\"_blank\" id=\"bubblechart\">Bubble Chart</a>";
     }
 ?>
-	<table class=gridtable id="table_<?php echo $node ?>">
-	<colgroup>
-       <col span="1" style="width: 50px;">
-       <col span="1" style="width: 300px;">
-       <col span="1" style="width: 80px;">
-       <col span="1" style="width: 100px;">
-       <col span="1" style="width: 70px;">
-       <col span="1" style="width: 80px;">
-       <col span="1" style="width: 90px;">
-    </colgroup>
-	<thead>
-	<tr style="font-size:20px"><th colspan="7"><i><?php echo $title; ?></i></th></tr>
-	<tr><th>Node</th><th>Node Information</th><th>Received</th><th>Link</th><th>Direction</th><th>Connected</th><th>Mode</th></tr>
-	</thead>
-	<tbody>
-	<tr><td colspan="7">Waiting...</td></tr>
-	</tbody>
-	</table><br />
+<div class="card my-3"> <!-- Node card -->
+  <h2 class="card-header bg-dark text-white"><?php echo $title; ?></h2>
+  <div class="card-body">
+    <div class="container overflow-hidden connect-container"> <!-- Connection management box -->
+      <div class="row gy-3 py-3 bg-light">
+        <label class="col-auto col-form-label col-form-label-sm" for="input-nodenum-<?php echo $node ?>">Connect <b><?php echo $node ?></b> to:</label>
+        <div class="col-sm"><input type="text" class="form-control form-control-sm" placeholder="Node number" id="input-nodenum_<?php echo $node ?>"></div>
+        <label class="col-auto col-form-label col-form-label-sm" for="select-conntype-<?php echo $node ?>">Connection type: </label>
+        <div class="col-sm">
+          <select class="form-select form-select-sm" id="select-conntype_<?php echo $node ?>">
+            <option value="connect" selected>TX/RX</option>
+            <option value="permanet">TX/RX - Permanent</option>
+            <option value="monitor">RX Only (Monitor)</option>
+            <option value="localmonitor">Local Monitor</option>
+          </select>
+        </div>
+        <div class="col-sm"><button type="button" class="btn btn-primary btn-sm connect-button" id="connect-button_<?php echo $node ?>">Connect</button></div>
+      </div>
+    </div> <!-- Connection management box -->
+    <h3 class="mt-3">Connected Nodes:</h3>
+    <div class="table-responsive"> <!-- Connected nodes table -->
+      <table class="table table-hover" id="table_<?php echo $node ?>">
+        <thead>
+          <tr>
+            <th scope="col">Node</th>
+            <th scope="col">Node Information</th>
+            <th scope="col">Last PTT</th>
+            <th scope="col">Link</th>
+            <th scope="col">Direction</th>
+            <th scope="col">Connected</th>
+            <th scope="col">Mode</th>
+            <th scope="col">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="8">Waiting...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div> <!-- Connected nodes table -->
+  </div>
+</div> <!-- Node card -->
 <?php
 }
 ?>

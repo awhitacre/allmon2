@@ -20,6 +20,8 @@ if (!empty($var1[1])) {
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="format-detection" content="telephone=no">
 <title><?php echo $pageTitle; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="generator" content="By hand with a text editor">
@@ -29,6 +31,7 @@ if (!empty($var1[1])) {
 <meta name="author" content="Tim Sawyer, WD6AWP">
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <link type="text/css" rel="stylesheet" href="allmon.css">
 <link type="text/css" rel="stylesheet" href="jquery-ui.css">
 <script src="jquery-3.3.1.min.js"></script>
@@ -54,6 +57,8 @@ $(document).ready(function() {
 
         $('#connect_form').hide();
         $('#logoutlink').hide();
+        $('.connect-container').hide();
+        $('.disconnect-button').hide();
 
 <?php } ?>
 
@@ -78,6 +83,8 @@ $(document).ready(function() {
                $('#test_area').load("login.php", { 'user' : user, 'passwd' : passwd }, function(response) {
                    if (response.substr(0,5) != 'Sorry') {
                        $('#connect_form').show();
+                       $('.connect-container').show();
+                       $('.disconnect-button').show();
                        $('#logoutlink').show();
                        $('#loginlink').hide();
                    }
@@ -108,6 +115,8 @@ $(document).ready(function() {
         }
         $('#logoutlink').hide();
         $('#connect_form').hide();
+        $('.connect-container').hide();
+        $('.disconnect-button').hide();
         event.preventDefault();
     });
 
@@ -166,6 +175,40 @@ $(document).ready(function() {
           }  
     });
     
+    $('.connect-button').on('click', function() {
+      var localNode = $(this).attr('id').split('_')[1];
+      var remoteNode = $('#input-nodenum_'+localNode).val();
+      var connType = $('#select-conntype_'+localNode).val();
+      var perm = false;
+      if (connType == 'permanet') {
+        perm = true;
+      }
+      var button = 'connect';
+      if (connType == 'monitor' || connType == 'localmonitor') {
+        button = connType;
+      }
+      $.ajax( { url:'connect.php', data: { 'remotenode' : remoteNode, 'perm' : perm, 'button' : button, 'localnode' : localNode }, type:'post', success: function(result) {
+          $('#test_area').html(result);
+          $('#test_area').stop().css('opacity', 1).fadeIn(50).delay(1000).fadeOut(2000);
+        }
+      });
+    });
+    
+    $('tbody').on('click', '.disconnect-button', function() {
+      console.log("Disconnect");
+      var localNode = $(this).attr('id').split('_')[1];
+      var remoteNode = $(this).attr('id').split('_')[2];
+      //r = confirm("Disconnect " + remoteNode + " from " + localNode + "?");
+      //if (r !== true) {
+      //  return;
+      //}
+      $.ajax( { url:'connect.php', data: { 'remotenode' : remoteNode, 'perm' : true, 'button' : 'disconnect', 'localnode' : localNode }, type:'post', success: function(result) {
+          $('#test_area').html(result);
+          $('#test_area').stop().css('opacity', 1).fadeIn(50).delay(1000).fadeOut(2000);
+        }
+      });
+    });
+    
     // Uncomment this block to allow shift+h to show login dialog.  
     $(document).keypress(function(event) {
         if (hideLoginLink) {
@@ -189,18 +232,31 @@ $(document).ready(function() {
 </script>
 </head>
 <body>
-<div id="header">
-<div id="headerTitle"><a href="<?php echo $home ?>">Allstar Monitor II</a></div>
-<div id="headerTag">
-Monitoring the World One Node at a Time
-</div>
-<!-- Login opener -->
-<div id="headerLogin">
-<a href="#" id="loginlink">Login</a>
-<a href="#" id="logoutlink">Logout</a>
-</div>
-<div id="headerImg"><img src="allstarLogo.png" alt="Allstar Logo"></div>
-</div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand">
+      <img src="allstarLogo.png" width="50%" height="50%" alt="Allstar Logo" title="Allstar Monitor" class="d-inline-block align-text-middle">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="index.php">Home</a>
+        </li>
+<?php include "menu.inc" ?>
+        <li class="nav-item">
+          <a class="nav-link" id="loginlink" href="#">Log in</a>
+          <a class="nav-link" id="logoutlink" href="#">Log out</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+
 <div class="clearer"></div>
 <!-- Login form -->
 <div id="login">
@@ -213,6 +269,7 @@ Monitoring the World One Node at a Time
 </form>
 </div>
 </div>
-<?php include "menu.inc" ?>
+
 <!-- Command response area -->
 <div id="test_area"></div>
+<div class="container">

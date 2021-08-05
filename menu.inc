@@ -45,31 +45,28 @@ foreach($config as $name => $data) {
 //print '<pre>'; print_r($systems); print '</pre>';
 
 // Output menu 
-$outBuf = "<div id=\"menu\">\n";
-$outBuf .= "<ul>";
+//$outBuf = "<div id=\"menu\">\n";
+//$outBuf .= "<ul>";
+$outBuf = "";
 foreach ($systems as $sysName => $items) {
     if ($sysName == "MainNavBar") {
-        // $itemName = key($items);
-        // $url =  $items[$itemName]['url'];
-        // $outBuf .= "<li><a href=\"$url\">$itemName</a></li>\n";
-        $outBuf .= "<li>";
         foreach($items as $itemName => $itemValue) {
-            $outBuf .= "  <a href=\"" . $itemValue['url'] .  "\">$itemName</a>";
+          $outBuf .= "<li class=\"nav-item\"><a class=\"nav-link\" href=\"" . $itemValue['url'] .  "\">$itemName</a></li>";
         }
-        $outBuf .= "</li>";
     } else {
-        $outBuf .= "<li class=\"dropdown\">\n";
-        $outBuf .= "<a href=\"#\" class=\"dropbtn\">$sysName</a>\n";
-        $outBuf .= "<div class=\"dropdown-content\">\n";
+        $outBuf .= "<li class=\"nav-item dropdown\">\n";
+        $outBuf .= "  <a class=\"nav-link dropdown-toggle\" href=\"#\" id=\"navbarDropdown-$sysName\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">$sysName</a>\n";
+        $outBuf .= "  <ul class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown-$sysName\">\n";
         foreach($items as $itemName => $itemValue) {
-            $outBuf .= "  <a href=\"" . $itemValue['url'] .  "\">$itemName</a>\n";
+            $outBuf .= "    <li><a class=\"dropdown-item\" href=\"" . $itemValue['url'] .  "\">$itemName</a></li>\n";
         }
-        $outBuf .= "</div>\n</li>\n";
+        $outBuf .= "  </ul>\n";
+        $outBuf .= "</li>\n";
     }
 }
 
-$outBuf .= "</ul>\n</div>\n";
-$outBuf .= "<div class=\"clearer\"></div>";
+//$outBuf .= "</ul>\n</div>\n";
+//$outBuf .= "<div class=\"clearer\"></div>";
 print $outBuf;
 
 //print '<pre>'; print_r($outBuf); print '</pre>';

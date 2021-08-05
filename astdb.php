@@ -24,7 +24,7 @@
    - Minor edits to messages
  */
 
-$dir = "/var/www/html/allmon2/";
+$dir = "/var/www/html/dev-allmon/";
 $db = $dir . "astdb.txt";
 $privatefile = $dir . "privatenodes.txt";
 
